@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.TUserInfoMapper">
+
+	<resultMap id="BaseResultMap" type="cn.com.na.bean.TUserInfo">
+		<!-- ID -->
+		<id column="Id" property="Id" jdbcType="INTEGER" />
+		<!-- 用户ID -->
+		<result column="userId" property="userId" jdbcType="INTEGER" />
+		<!-- 昵称 -->
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<!-- 性别： 1：男 0 女 -->
+		<result column="sex" property="sex" jdbcType="VARCHAR" />
+		<!-- 用户头像存放路径 -->
+		<result column="img" property="img" jdbcType="VARCHAR" />
+		<!-- 域名URL -->
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<!-- 移动电话号码 -->
+		<result column="mPhone" property="mPhone" jdbcType="VARCHAR" />
+		<!-- 固定电话 -->
+		<result column="tPhone" property="tPhone" jdbcType="VARCHAR" />
+		<!-- 邮箱 -->
+		<result column="eMail" property="eMail" jdbcType="VARCHAR" />
+		<!-- 地址 -->
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<!-- 注册日期 -->
+		<result column="reTIme" property="reTIme" jdbcType="VARCHAR" />
+		<!-- 备注 -->
+		<result column="note" property="note" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		userId,nickName,sex,img,url,mPhone,tPhone,eMail,address,reTIme,note
+	</sql>
+
+	<!-- 检测用户名和密码 -->
+	<select id="getUserInfo" parameterType="java.lang.Integer"  resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_userinfo
+		where userId = #{userId}
+	</select>
+	
+	<update id="updateUserInfo" parameterType="cn.com.na.bean.TUserInfo">
+	UPDATE t_userinfo
+	<trim prefix="SET" suffixOverrides=",">
+		<if test="nickName != null and nickName != '' ">
+			nickName=#{nickName}, 
+		</if>
+		<if test="sex != null and sex != '' ">
+			sex=#{sex}, 
+		</if>
+		<if test="img != null and img != '' ">
+			img=#{img}, 
+		</if>
+		<if test="url != null and url != '' ">
+			url=#{url}, 
+		</if>
+		<if test="mPhone != null and mPhone != '' ">
+			mphone=#{mPhone}, 
+		</if>
+		<if test="tPhone != null and tPhone != '' ">
+			tPhone=#{tPhone}, 
+		</if>
+		<if test="eMail != null and eMail != '' ">
+			email=#{eMail}, 
+		</if>
+		<if test="address != null and address != '' ">
+			address=#{address}, 
+		</if>
+		<if test="note != null and note != '' ">
+			note=#{note}, 
+		</if>
+	</trim>
+		WHERE userId=#{userId}
+	</update>
+
+	<!-- 添加用户 -->
+	<insert id="addUserInfo" parameterType="cn.com.na.bean.TUserInfo"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO t_userinfo
+		(
+		userId, nickName,
+		sex, img, url, mPhone, tPhone,eMail,address,reTIme,note
+		)
+		VALUES
+		(
+		#{userId,jdbcType=INTEGER},
+		#{nickName,jdbcType=VARCHAR},
+		#{sex,jdbcType=INTEGER},
+		#{img,jdbcType=VARCHAR},
+		#{url,jdbcType=VARCHAR},
+		#{mPhone,jdbcType=VARCHAR},
+		#{tPhone,jdbcType=VARCHAR},
+		#{eMail,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR},
+		#{reTIme,jdbcType=VARCHAR},
+		#{note,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	
+	<!-- 添加验证码 -->
+	<insert id="addVerificationCode" parameterType="cn.com.na.bean.VerificationCode">
+		INSERT INTO verificationcode
+		(
+		account, code,effecttime
+		)
+		VALUES
+		(
+		#{account,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{effecttime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	
+	<!-- 根据userId删除验证码 -->	
+	<delete id="delVerificationCodeByAccount" parameterType="java.lang.String">
+		delete from verificationcode where account=#{account,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 根据userId查询验证码 -->
+	<select id="queryVerificationCodeByAccount" parameterType="java.lang.String"  
+		resultType="cn.com.na.bean.VerificationCode">
+		select *
+		from verificationcode
+		where account = #{account,jdbcType=VARCHAR}
+	</select>
+</mapper>

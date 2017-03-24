@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.ScheduledMapper">
+
+	<insert id="addScheduled" parameterType="cn.com.na.bean.ScheduledTask">
+		INSERT INTO scheduledtask
+		(sid,deviceId,taskTime,userId,setTime,isActive,note,message,mac)VALUES(
+			#{sid,jdbcType=INTEGER},
+			#{deviceId,jdbcType=INTEGER},
+			#{taskTime,jdbcType=VARCHAR},
+			#{userId,jdbcType=INTEGER},
+			now(),
+			#{isActive,jdbcType=INTEGER},
+			#{note,jdbcType=VARCHAR},
+			#{message,jdbcType=VARCHAR},
+			#{mac,jdbcType=VARCHAR}
+			)
+	</insert>
+    
+    <insert id="addTaskToScheuled" parameterType="cn.com.na.bean.Task">
+    	INSERT INTO task
+		(scheduledId,deviceId)VALUES(
+			#{scheuldeId,jdbcType=INTEGER},
+			#{deviceId,jdbcType=INTEGER})
+    </insert>
+    
+    <select id="queryTaskDeviceId" parameterType="java.lang.Integer" resultType="cn.com.na.bean.Task">
+		SELECT * FROM task WHERE scheduledId =#{scheduledId,jdbcType=INTEGER}
+	</select>
+  
+  <!-- %Y-%m-%d %H:%i 格式：2016-12-12 17:30 -->
+    <select id="queryscheduledId" resultType="cn.com.na.bean.ScheduledTask">
+		SELECT * FROM scheduledtask WHERE isActive = 1 
+		AND taskTime = DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i')
+	</select>
+	
+	<delete id="delScheduled" parameterType="cn.com.na.bean.ScheduledTask">
+	  delete from scheduledtask where 1=1 and
+	   <if test="sid != null">
+			sid =#{sid}
+	   </if>
+	   <if test="deviceId != null">
+			deviceId =#{deviceId}
+	   </if>
+	</delete>
+	
+	 <select id="queryScheduled" resultType="cn.com.na.bean.ScheduledTask" parameterType="cn.com.na.bean.ScheduledTask">
+			SELECT * FROM scheduledtask WHERE 1=1
+	   <if test="userId != null">
+			and userId =#{userId}
+	   </if>
+	   <if test="deviceId != null">
+			and deviceId =#{deviceId}
+	   </if>
+	</select>
+	
+	
+	<update id="updateScheduled" parameterType="cn.com.na.bean.ScheduledTask">
+	UPDATE scheduledtask
+	<trim prefix="SET" suffixOverrides=",">
+		<if test="isActive != null">
+			isActive=#{isActive,jdbcType=INTEGER}, 
+		</if>
+		<if test="mac != null and mac != '' ">
+			mac=#{mac}, 
+		</if>
+		<if test="message != null and message != '' ">
+			message=#{message}, 
+		</if>
+		<if test="note != null and note != '' ">
+			note=#{note,jdbcType=VARCHAR}, 
+		</if>
+		<if test="setTime != null and setTime != '' ">
+			setTime=#{setTime,jdbcType=TIMESTAMP}, 
+		</if>
+		<if test="taskTime != null and taskTime != '' ">
+			taskTime=#{taskTime}
+		</if>
+	</trim>
+		WHERE sid=#{sid}
+	</update>
+	
+</mapper>

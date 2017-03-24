@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.DeviceInfoMapper">
+
+	<resultMap id="BaseResultMap" type="cn.com.na.bean.DeviceInfo">
+		<!-- <id column="Id" property="Id" jdbcType="INTEGER" /> <result column="userName" 
+			property="UserName" jdbcType="VARCHAR" /> <result column="password" property="Password" 
+			jdbcType="VARCHAR" /> <result column="overdue" property="Overdue" jdbcType="TIMESTAMP" 
+			/> -->
+	</resultMap>
+
+	<sql id="Base_Column_List">
+
+	</sql>
+
+	<sql id="limitContPage">
+		<choose>
+			<when
+				test="firstRecordIndex != null and firstRecordIndex >= 0 and pageSize != null and pageSize > 0">LIMIT ${firstRecordIndex},${pageSize}</when>
+			<otherwise>
+				<if test="pageSize != null and pageSize > 0">LIMIT ${pageSize}</if>
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="queryDeviceInfoByUnique" parameterType="java.lang.String"
+		resultType="cn.com.na.bean.DeviceInfo">
+		SELECT deviceId FROM deviceinfo WHERE mac
+		=#{mac,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryDeviceMacInfoByDeviceId" parameterType="java.lang.Integer"
+		resultType="java.lang.String">
+		SELECT mac FROM deviceinfo WHERE deviceId
+		=#{deviceId,jdbcType=Integer}
+	</select>
+	<select id="queryDeviceMacInfoByDeviceIds" resultType="cn.com.na.bean.DeviceInfo">
+		SELECT d.* FROM deviceInfo d, task t
+		WHERE d.deviceid = t.deviceId AND
+		t.`scheduledId` IN
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="queryDevicesInfos" parameterType="java.lang.Integer"
+		resultType="cn.com.na.bean.DeviceInfoVo">
+		SELECT df.*,dl.isOnline,dl.isOpen FROM deviceinfo df
+		LEFT
+		JOIN deviceonline dl ON df.deviceId = dl.deviceId
+		WHERE
+		df.userId=#{userId}
+	</select>
+
+	<insert id="addDeviceInfo" parameterType="cn.com.na.bean.DeviceInfo">
+		INSERT INTO
+		deviceinfo(dcld,dName,userId,fVersion,hVersion,mac,note)
+		VALUES (
+		#{dcld,jdbcType=VARCHAR},
+		#{dName,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		#{fVersion,jdbcType=VARCHAR},
+		#{hVersion,jdbcType=VARCHAR},
+		#{mac,jdbcType=VARCHAR},
+		#{note,jdbcType=VARCHAR});
+	</insert>
+
+	<delete id="delDeviceInfo" parameterType="cn.com.na.bean.DeviceInfo">
+		delete from deviceinfo where deviceId=#{deviceId,jdbcType=VARCHAR}
+	</delete>
+
+
+	<select id="queryDeviceInfoCountByParam" resultType="Long"
+		parameterType="cn.com.na.bean.DeviceInfo">
+		SELECT
+		COUNT(1)
+		FROM deviceinfo d
+		WHERE 1=1
+		<if test="userId != null">
+			AND d.userId = #{userId,jdbcType=INTEGER}
+		</if>
+		<if test="queryDeviceType != null and queryDeviceType == 1">
+			OR d.deviceId in (select a.deviceId from authorized a where a.auserId
+			= #{userId,jdbcType=INTEGER})
+		</if>
+
+	</select>
+
+	<select id="queryDeviceInfoByParam" resultType="cn.com.na.bean.DeviceInfo"
+		parameterType="cn.com.na.bean.DeviceInfo">
+		SELECT d.*,(SELECT u.account FROM t_user u WHERE u.userId = d.userId) AS userName,
+		(SELECT dl.isOnline FROM deviceonline dl WHERE dl.deviceId = d.deviceId) AS isOnline,
+		(SELECT dl.isOpen FROM deviceonline dl WHERE dl.deviceId = d.deviceId) AS isOpen
+		FROM deviceinfo d
+		WHERE 1=1
+		<if test="userId != null">
+			AND d.userId = #{userId,jdbcType=INTEGER}
+		</if>
+		<if test="queryDeviceType != null and queryDeviceType == 1">
+			OR d.deviceId in (select a.deviceId from authorized a where a.auserId
+			= #{userId,jdbcType=INTEGER})
+		</if>
+
+		<include refid="limitContPage" />
+	</select>
+
+</mapper>

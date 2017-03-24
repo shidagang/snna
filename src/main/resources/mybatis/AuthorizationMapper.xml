@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.AuthorizationMapper">
+
+	<resultMap id="BaseResultMap" type="cn.com.na.bean.Authorization">
+ 		<id column="aid" property="aId" jdbcType="INTEGER" />
+ 		<result column="deviceId" property="deviceId" jdbcType="INTEGER" />
+ 		<result column="deviceName" property="deviceName" jdbcType="VARCHAR" />
+    	<result column="buserId" property="bUserId" jdbcType="INTEGER" />
+    	<result column="auserId" property="aUserId" jdbcType="INTEGER" />
+    	<result column="auserName" property="aUserName" jdbcType="VARCHAR" />
+    	<result column="note" property="note" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+	aid,deviceId,buserId,auserId,note
+	</sql>
+	
+	<sql id="limitContPage">
+        <choose>
+			<when test="firstRecordIndex != null and firstRecordIndex >= 0 and pageSize != null and pageSize > 0">LIMIT ${firstRecordIndex},${pageSize}</when>
+			<otherwise>
+				<if test="pageSize != null and pageSize > 0">LIMIT ${pageSize}</if>
+			</otherwise>
+		</choose>
+	</sql>
+
+
+	<insert id="addAuthorization" useGeneratedKeys="true"
+		parameterType="java.util.List">
+		<selectKey resultType="long" keyProperty="aid" order="AFTER">
+			SELECT
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into authorized (deviceId,buserId,auserId,note)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.deviceId},#{item.bUserId},#{item.aUserId},#{item.note})
+		</foreach>
+	</insert>
+
+	<!-- <insert id="addAuthorization" parameterType="java.util.List"> INSERT 
+		INTO authorized(deviceId,buserId,auserId,note) VALUES (#{deviceId,jdbcType=INTEGER}, 
+		#{bUserId,jdbcType=INTEGER}, #{aUserId,jdbcType=INTEGER}, #{note,jdbcType=VARCHAR}); 
+		</insert> -->
+
+	<delete id="delAuthorization" parameterType="Map">
+		delete FROM authorized where aId IN
+		<foreach collection="aIds" item="aId" index="index" open="("
+			separator="," close=")">
+			#{aId,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<select id="queryAuthorizationCountByParam"  resultType="Long" parameterType="cn.com.na.bean.Authorization" >
+    SELECT 
+    COUNT(1) 
+    FROM authorized
+    WHERE 1=1
+      <if test="bUserId != null" >
+       AND buserId = #{bUserId,jdbcType=INTEGER}
+      </if>
+	</select>
+	
+	<select id="queryAuthorizationByParam" resultMap="BaseResultMap" parameterType="cn.com.na.bean.Authorization" >
+    SELECT a.aid,a.deviceId,a.buserId,a.auserId,a.note,(select d.dName from deviceinfo d where d.deviceId = a.deviceId) as deviceName,
+    (select u.account from t_user u where u.userId=a.auserId) as auserName
+    FROM authorized a
+    WHERE 1=1
+      <if test="bUserId != null" >
+       AND a.buserId  =  #{bUserId,jdbcType=INTEGER}
+      </if>
+    <include refid="limitContPage" />
+    </select>
+	
+
+
+	<select id="queryAuthByUserId" parameterType="java.lang.String"
+		resultType="cn.com.na.bean.Authorization">
+		  SELECT aid,deviceId,buserId,auserId,note,(select d.dName from deviceinfo d where d.deviceId = a.deviceId) as deviceName from authorized a
+		WHERE buserId=#{buserId,jdbcType=INTEGER}
+	</select>
+	
+	
+	<select id="queryAuthByUserIdAndDeviceId" parameterType="cn.com.na.bean.Authorization"
+		resultType="cn.com.na.bean.Authorization">
+		SELECT aid,deviceId,buserId,auserId,note from authorized
+		WHERE deviceId = #{deviceId,jdbcType=INTEGER}
+		<if test="bUserId != null" >
+       		AND buserId  =  #{bUserId,jdbcType=INTEGER}
+        </if>
+        <if test="aUserId != null" >
+       		AND auserId  =  #{aUserId,jdbcType=INTEGER}
+        </if>
+	</select>
+
+</mapper>

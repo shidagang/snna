@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.DeviceInstructMapper">
+
+	<resultMap id="BaseResultMap" type="cn.com.na.bean.DeviceInstruct">
+
+	</resultMap>
+
+	<sql id="Base_Column_List">
+
+	</sql>
+	<insert id="addDeviceInstruct" parameterType="cn.com.na.bean.DeviceInstruct">
+		INSERT INTO deviceinstruct(dcId,instruct,note)
+		VALUES (#{dcId,jdbcType=INTEGER},
+		#{instruct,jdbcType=INTEGER},
+		#{note,jdbcType=VARCHAR});
+	</insert>
+	
+	<delete id="delDeviceInstruct" parameterType="cn.com.na.bean.DeviceInstruct">
+		delete from deviceinstruct where id=#{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	<update id="updateDeviceInstruct" parameterType="cn.com.na.bean.DeviceInstruct">
+	UPDATE deviceinstruct
+	<trim prefix="SET" suffixOverrides=",">
+		<if test="dcId != null">
+			dcId=#{dcId,jdbcType=INTEGER}, 
+		</if>
+		<if test="instruct != null">
+			instruct=#{instruct,jdbcType=INTEGER}, 
+		</if>
+		<if test="note != null and note != '' ">
+			note=#{note,jdbcType=VARCHAR}, 
+		</if>
+	</trim>
+		WHERE id=#{id}
+	</update>
+	
+	
+	<select id="queryDeviceInstructByDcId" parameterType="java.lang.Integer"
+		resultType="cn.com.na.bean.DeviceInstruct">
+		select * from deviceinstruct where dcId = #{dcId}
+	</select>
+	
+	
+
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.DeviceClassMapper">
+
+	<resultMap id="BaseResultMap" type="cn.com.na.bean.DeviceClass">
+
+	</resultMap>
+
+	<sql id="Base_Column_List">
+
+	</sql>
+	<insert id="addDeviceClass" parameterType="cn.com.na.bean.DeviceClass">
+		INSERT INTO deviceclass(dcName,description,note)
+		VALUES (#{dcName,jdbcType=VARCHAR},
+		#{description,jdbcType=VARCHAR},
+		#{note,jdbcType=VARCHAR});
+	</insert>
+	
+	<delete id="delDeviceClass" parameterType="cn.com.na.bean.DeviceClass">
+		delete from deviceclass where dcld=#{dcld,jdbcType=INTEGER}
+	</delete>
+	
+
+	<select id="queryDeviceClass" parameterType="cn.com.na.bean.DeviceClass"
+		resultType="cn.com.na.bean.DeviceClass">
+		select * from deviceclass 
+	</select>
+	
+
+</mapper>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.na.mapper.FeedBackMapper">
+	<insert id="addFeedBack" parameterType="cn.com.na.bean.FeedBack">
+		INSERT INTO feedback(userId, title,content,note)
+		 values(#{userId}, 
+		 		#{title,jdbcType=VARCHAR},
+		 		#{content,jdbcType=VARCHAR},
+		 		#{note,jdbcType=VARCHAR});
+	</insert>
+
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+	
+	<!-- 扫描controller 用于注解 -->
+	<!-- 它背后注册了很多用于解析注解的处理器，其中就包括<context:annotation-config/>配置在
+	注解所使用在处理器，配置了<context:component-scan base-package="">之后，便无需再配置
+	 <context:annotation-config/>-->
+	<context:annotation-config/>
+	<context:component-scan base-package="cn.com.na.*"/>
+	<!-- fastJson -->
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<bean
+				class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+				<property name="supportedMediaTypes">
+		            <list>
+		                <value>application/json;charset=UTF-8</value>
+		                <value>text/html;charset=UTF-8</value>
+		                <value>text/plain;charset=UTF-8</value>
+		            </list>
+		         </property>
+				<property name="features">
+					<array>
+						<value>WriteMapNullValue</value>
+						<value>WriteNullStringAsEmpty</value>
+						<value>DisableCircularReferenceDetect</value>
+					</array>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- 配置SpringMVC的视图解析器-->
+	<!-- 起viewClass属性的默认值就是org.springframework.web.servlet.view.JstlView -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+        <property name="prefix" value="/WEB-INF/jsp/" />  
+        <property name="suffix" value=".jsp" />  
+    </bean>  
+    <!-- 
+	 <bean id="multipartResolver"    
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">    
+        <property name="defaultEncoding" value="utf-8" />    
+        <property name="maxUploadSize" value="10485760000" />    
+        <property name="maxInMemorySize" value="1024" />    
+	</bean>
+   -->
+     <!-- <bean  class="cn.com.na.utils.ApplicationContextUtils"/> -->
+    <!-- Netty 服务启动 -->
+	 <bean id="echoServer" class="cn.com.na.netty5.echo.server.EchoServer" init-method="initMethod" />
+	<bean id="echoServerHandler" class="cn.com.na.netty5.echo.server.EchoServerHandler"/>
+
+
+<!--要调用的工作 -->  
+    <bean id="timeAction" class="cn.com.na.timer.TimerAction"/>  
+    <!--定义调用对象和调用对象的方法-->  
+    <bean id="jobtask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <!--调用的类-->  
+        <property name="targetObject">  
+            <ref bean="timeAction"/>  
+        </property>  
+        <!--调用类中的方法-->  
+        <property name="targetMethod">  
+                <value>start</value>  
+        </property>  
+    </bean>  
+    
+    <!--定义触发时间-->  
+    <bean id="doTime" class="org.springframework.scheduling.quartz.CronTriggerBean">  
+        <property name="jobDetail">  
+            <ref bean="jobtask"/>  
+        </property>  
+        <!--cron表达式-->  
+        <property name="cronExpression">  
+            <!-- <value>0 0 8 * * ?</value> -->  
+            <!-- <value>1/1 * * * * ?</value>   -->
+            <value>0 0/1 * * * ?</value>
+        </property>  
+    </bean>  
+    <!-- 总管理类 如果将lazy-init='false'那么容器启动就会执行调度程序  -->  
+    <bean id="startQuertz" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+        <property name="triggers">  
+            <list>  
+                <ref bean="doTime"/>  
+            </list>  
+        </property>  
+    </bean>  
+    
+</beans>
